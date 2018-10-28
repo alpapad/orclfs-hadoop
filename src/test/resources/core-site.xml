@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+	<property>
+		<name>fs.default.name</name>
+		<value>orcl://dfs@localhost:1521/</value>
+	</property>
+	<property>
+		<name>fs.defaultFS</name>
+		<value>orcl://dfs@localhost:1521/</value>
+	</property>
+	<property>
+		<name>fs.AbstractFileSystem.orcl.impl</name>
+		<value>org.apache.hadoop.fs.orcl.OrclFs</value>
+	</property>
+	<property>
+		<name>fs.orcl.impl</name>
+		<value>org.apache.hadoop.fs.orcl.OrclFileSystem</value>
+	</property>
+</configuration>
