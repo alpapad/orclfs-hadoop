@@ -19,11 +19,10 @@
 package org.apache.hadoop.fs.contract.orclfs;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.contract.AbstractContractRenameTest;
+import org.apache.hadoop.fs.contract.AbstractContractSetTimesTest;
 import org.apache.hadoop.fs.contract.AbstractFSContract;
 
-public class TestOrclFSContractRename extends AbstractContractRenameTest {
-    
+public class TestOrclFSContractSetTimesTest extends AbstractContractSetTimesTest {
     @Override
     protected AbstractFSContract createContract(Configuration conf) {
         return new OrclFSContract(conf);

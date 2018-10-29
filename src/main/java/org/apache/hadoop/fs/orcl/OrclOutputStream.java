@@ -24,7 +24,15 @@ public class OrclOutputStream extends OutputStream {
         // See: https://vsadilovskiy.wordpress.com/2007/11/19/blob-write-size-and-cpu/
         this.buffer = new byte[32*1024  - 240];
     }
-    
+    public OrclOutputStream(Configuration conf, OrclFsClient client, OrclInode inode, int bufferSize, long streamPos) {
+        this.client = client;
+        this.inode = inode;
+        this.closed = false;
+        
+        // See: https://vsadilovskiy.wordpress.com/2007/11/19/blob-write-size-and-cpu/
+        this.buffer = new byte[32*1024  - 240];
+        this.streamPos = streamPos;
+    }
     @Override
     public synchronized void close() throws IOException {
         flush();

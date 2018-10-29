@@ -27,14 +27,4 @@ public class TestOrclFSContractRootDirectory extends AbstractContractRootDirecto
   protected AbstractFSContract createContract(Configuration conf) {
     return new OrclFSContract(conf);
   }
-
-//  @Override
-//  public void testRmEmptyRootDirNonRecursive() throws Throwable {
-//    System.out.println("skipped");
-//  }
-//
-//  @Override
-//  public void testRmRootRecursive() throws Throwable {
-//    System.out.println("skipped");
-//  }
 }

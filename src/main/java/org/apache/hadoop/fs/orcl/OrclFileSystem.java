@@ -36,6 +36,20 @@ public class OrclFileSystem extends FileSystem {
         setConf(conf);
     }
     
+    /**
+     * Return the protocol scheme for this FileSystem.
+     * <p>
+     * This implementation throws an <code>UnsupportedOperationException</code>.
+     *
+     * @return the protocol scheme for this FileSystem.
+     * @throws UnsupportedOperationException if the operation is unsupported
+     *                                       (default).
+     */
+    @Override
+    public String getScheme() {
+        return "orcl";
+    }
+    
     @Override
     public FSDataOutputStream append(Path path, int bufferSize, Progressable progress) throws IOException {
         checkPath(path);
@@ -54,10 +68,23 @@ public class OrclFileSystem extends FileSystem {
         if (fd == null || !fd.isFile()) {
             throw new FileNotFoundException("Path " + path + " does not exist or it not a file");
         }
-        OrclOutputStream ostream = new OrclOutputStream(getConf(), client, fd, bufferSize);
-        return new FSDataOutputStream(ostream, statistics);
+        OrclOutputStream ostream = new OrclOutputStream(getConf(), client, fd, bufferSize, fd.getSize());
+        return new FSDataOutputStream(ostream, statistics, fd.getSize());
     }
     
+    /*
+     * Concat existing files together.
+     * @param trg the path to the target destination.
+     * @param psrcs the paths to the sources to use for the concatenation.
+     * @throws IOException IO failure
+     * @throws UnsupportedOperationException if the operation is unsupported
+     *         (default).
+     *
+    public void concat(final Path trg, final Path [] psrcs) throws IOException {
+      throw new UnsupportedOperationException("Not implemented by the " +
+          getClass().getSimpleName() + " FileSystem implementation");
+    }*/
+
     @Override
     public void close() throws IOException {
         super.close();
@@ -266,7 +293,7 @@ public class OrclFileSystem extends FileSystem {
     public Path getHomeDirectory() {
         return this.makeQualified(new Path("/"));
     }
-
+    
     @Override
     public FileStatus[] listStatus(Path path) throws IOException {
         checkPath(path);

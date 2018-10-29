@@ -6,10 +6,9 @@ package org.apache.hadoop.fs.orcl;
 import java.sql.Timestamp;
 
 public class OrclInode {
-    /** A constant indicating an FTPFile is a directory. ***/
     public static final int DIRECTORY_TYPE = 1;
-    /** A constant indicating an FTPFile is a file. ***/
     public static final int FILE_TYPE = 0;
+
     public static final int O_APPEND = 4;
     public static final int O_CREAT = 8;
     
@@ -20,22 +19,18 @@ public class OrclInode {
     public static final int O_TRUNC = 16;
     public static final int O_WRONLY = 64;
 
-    private Timestamp atime;
-    private String group;
-    private long id;
-    private short mode;
+    private final Timestamp atime;
+    private final String group;
+    private final long id;
+    private final short mode;
     
-    private Timestamp mtime;
-    private String name;
-    private String owner;
-    private Long parent;
-    private String path;
-    private long size;
-    private int type;
-    
-    public OrclInode() {
-        super();
-    }
+    private final Timestamp mtime;
+    private final String name;
+    private final String owner;
+    private final Long parent;
+    private final String path;
+    private final long size;
+    private final int type;
     
     public OrclInode(long id, Long parent, String name, String path, int type, short mode, String owner, String group, long size, Timestamp atime, Timestamp mtime) {
         super();
@@ -97,55 +92,11 @@ public class OrclInode {
     }
     
     public boolean isDir() {
-        return type == DIRECTORY_TYPE;
+        return getType() == DIRECTORY_TYPE;
     }
     
     public boolean isFile() {
-        return type != DIRECTORY_TYPE;
-    }
-    
-    public void setAtime(Timestamp atime) {
-        this.atime = atime;
-    }
-    
-    public void setGroup(String group) {
-        this.group = group;
-    }
-    
-    public void setId(long id) {
-        this.id = id;
-    }
-    
-    public void setMode(short mode) {
-        this.mode = mode;
-    }
-    
-    public void setMtime(Timestamp mtime) {
-        this.mtime = mtime;
-    }
-    
-    public void setName(String name) {
-        this.name = name;
-    }
-    
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-    
-    public void setParent(Long parent) {
-        this.parent = parent;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public void setSize(long size) {
-        this.size = size;
-    }
-    
-    public void setType(int type) {
-        this.type = type;
+        return getType() != DIRECTORY_TYPE;
     }
 
     @Override

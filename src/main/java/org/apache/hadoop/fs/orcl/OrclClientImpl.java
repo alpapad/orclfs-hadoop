@@ -4,6 +4,7 @@
 package org.apache.hadoop.fs.orcl;
 
 import java.io.BufferedOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -49,6 +50,7 @@ class OrclClientImpl extends OrclFsClient {
         if (inode == null) {
             if ((flags & OrclInode.O_CREAT) == OrclInode.O_CREAT) {
                 Path parent = path.getParent();
+                this.mkdirs(parent, FsPermission.getDirDefault().applyUMask(FsPermission.getUMask(configuration)).toShort());
                 OrclInode pInode = fetchInodeInfo(parent);
                 inode = createEntry(pInode, path.getName(), OrclInode.FILE_TYPE, mode);
                 if (inode == null) {
@@ -96,7 +98,7 @@ class OrclClientImpl extends OrclFsClient {
                 return inodes.toArray(new OrclInode[inodes.size()]);
             });
         } else {
-            throw new PathNotFoundException(pathString(path));
+            throw new FileNotFoundException(pathString(path));
         }
     }
     
@@ -145,7 +147,11 @@ class OrclClientImpl extends OrclFsClient {
             try (ResultSet rs = st.executeQuery()) {
                 if (rs.next()) {
                     Blob b = rs.getBlob(1);
-                    try (InputStream is = b.getBinaryStream(pos + 1, Math.min(length, b.length() - pos))) {
+                    long len = Math.min(length, b.length() - pos);
+                    if(pos >= b.length() || len <0) {
+                        return 0;
+                    }
+                    try (InputStream is = b.getBinaryStream(pos + 1, len)) {
                         return is.read(buffer);
                     }
                 }
@@ -208,7 +214,7 @@ class OrclClientImpl extends OrclFsClient {
                 return null;
             });
         } else {
-            throw new PathNotFoundException(pathString(path));
+            throw new FileNotFoundException(pathString(path));
         }
         
     }
