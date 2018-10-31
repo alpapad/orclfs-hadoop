@@ -29,7 +29,7 @@ abstract class OrclFsClient {
     
     abstract void setTimes(Path path, long atime, long mtime) throws IOException;
     
-    abstract void shutdown() throws IOException;
+    abstract void close() throws IOException;
     
     abstract FsStatus statfs(Path p);
     

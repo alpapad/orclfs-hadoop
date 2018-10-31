@@ -18,13 +18,39 @@
 
 package org.apache.hadoop.fs.contract.orclfs;
 
+import static org.apache.hadoop.fs.contract.ContractTestUtils.touch;
+
+import java.io.FileNotFoundException;
+import java.util.Date;
+
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.contract.AbstractContractSetTimesTest;
 import org.apache.hadoop.fs.contract.AbstractFSContract;
+import org.junit.Test;
 
 public class TestOrclFSContractSetTimesTest extends AbstractContractSetTimesTest {
     @Override
     protected AbstractFSContract createContract(Configuration conf) {
         return new OrclFSContract(conf);
+    }
+    
+    @Test
+    public void testSetTimesExistentFile() throws Throwable {
+        describe("create & set times a 0 byte file");
+        Path path = path("zero.txt");
+        try {
+
+            getFileSystem().setWorkingDirectory(new Path("/"));
+            touch(getFileSystem(), path);
+            long time = new Date().getTime();
+            getFileSystem().setTimes(path, time, time);
+            FileStatus stat = getFileSystem().getFileStatus(path);
+            assertEquals(time,  stat.getAccessTime());
+            assertEquals(time,  stat.getModificationTime());
+        } finally {
+            getFileSystem().delete(path, true);
+        }
     }
 }

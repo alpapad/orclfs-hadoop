@@ -1,8 +1,10 @@
 package org.apache.hadoop.fs.test.connector;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.DelegateToFileSystem;
 import org.apache.hadoop.fs.FileSystem;
 
 
@@ -15,5 +17,7 @@ public interface HcfsTestConnectorInterface {
 	
 	/* returns a configuration file with properties for a given FS */
 	public Configuration createConfiguration();
+
+    public DelegateToFileSystem createDelegate() throws IOException, URISyntaxException ;
 
 }

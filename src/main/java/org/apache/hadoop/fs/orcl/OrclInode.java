@@ -3,8 +3,6 @@
  */
 package org.apache.hadoop.fs.orcl;
 
-import java.sql.Timestamp;
-
 public class OrclInode {
     public static final int DIRECTORY_TYPE = 1;
     public static final int FILE_TYPE = 0;
@@ -19,12 +17,12 @@ public class OrclInode {
     public static final int O_TRUNC = 16;
     public static final int O_WRONLY = 64;
 
-    private final Timestamp atime;
+    private final long atime;
     private final String group;
     private final long id;
     private final short mode;
     
-    private final Timestamp mtime;
+    private final long mtime;
     private final String name;
     private final String owner;
     private final Long parent;
@@ -32,7 +30,7 @@ public class OrclInode {
     private final long size;
     private final int type;
     
-    public OrclInode(long id, Long parent, String name, String path, int type, short mode, String owner, String group, long size, Timestamp atime, Timestamp mtime) {
+    public OrclInode(long id, Long parent, String name, String path, int type, short mode, String owner, String group, long size, long atime, long mtime) {
         super();
         this.id = id;
         this.parent = parent;
@@ -47,7 +45,7 @@ public class OrclInode {
         this.mtime = mtime;
     }
     
-    public Timestamp getAtime() {
+    public long getAtime() {
         return atime;
     }
     
@@ -63,7 +61,7 @@ public class OrclInode {
         return mode;
     }
     
-    public Timestamp getMtime() {
+    public long getMtime() {
         return mtime;
     }
     
@@ -101,8 +99,8 @@ public class OrclInode {
 
     @Override
     public String toString() {
-        return "OrclInode [id=" + id + ", parent=" + parent + ", name=" + name + ", path=" + path + ", type=" + type + ", mode=" + mode + ", owner=" + owner + ", group=" + group + ", size=" + size
-                + ", atime=" + atime + ", mtime=" + mtime + "]";
+        return "OrclInode [id=" + id + ", parent=" + getParent() + ", name=" + getName() + ", path=" + path + ", type=" + type + ", mode=" + mode + ", owner=" + owner + ", group=" + group + ", size=" + size
+                + ", atime=" + getAtime() + ", mtime=" + getMtime() + "]";
     }
 
 }

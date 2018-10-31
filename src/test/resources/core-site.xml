@@ -17,4 +17,19 @@
 		<name>fs.orcl.impl</name>
 		<value>org.apache.hadoop.fs.orcl.OrclFileSystem</value>
 	</property>
+
+	<property>
+		<name>orclfs.connection.url</name>
+		<value>jdbc:oracle:thin:@//localhost:1521/XE</value>
+	</property>
+
+	<property>
+		<name>orclfs.connection.user</name>
+		<value>DFS</value>
+	</property>
+
+	<property>
+		<name>orclfs.connection.password</name>
+		<value>DFS</value>
+	</property>
 </configuration>

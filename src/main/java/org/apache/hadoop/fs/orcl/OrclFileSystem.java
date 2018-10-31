@@ -32,10 +32,10 @@ public class OrclFileSystem extends FileSystem {
     public OrclFileSystem() {
     }
     
-    public OrclFileSystem(URI uri, Configuration conf) {
-        setConf(conf);
+    public OrclFileSystem(Configuration conf) {
+        // BAD BAD BAD BAD
+        this.setConf(conf);
     }
-    
     /**
      * Return the protocol scheme for this FileSystem.
      * <p>
@@ -55,15 +55,11 @@ public class OrclFileSystem extends FileSystem {
         checkPath(path);
         path = makeAbsolute(path);
         
-        if (progress != null) {
-            progress.progress();
-        }
+        progress(progress);
         
         OrclInode fd = client.lstat(path);
         
-        if (progress != null) {
-            progress.progress();
-        }
+        progress(progress);
         
         if (fd == null || !fd.isFile()) {
             throw new FileNotFoundException("Path " + path + " does not exist or it not a file");
@@ -74,21 +70,25 @@ public class OrclFileSystem extends FileSystem {
     
     /*
      * Concat existing files together.
+     * 
      * @param trg the path to the target destination.
+     * 
      * @param psrcs the paths to the sources to use for the concatenation.
+     * 
      * @throws IOException IO failure
+     * 
      * @throws UnsupportedOperationException if the operation is unsupported
-     *         (default).
+     * (default).
      *
-    public void concat(final Path trg, final Path [] psrcs) throws IOException {
-      throw new UnsupportedOperationException("Not implemented by the " +
-          getClass().getSimpleName() + " FileSystem implementation");
-    }*/
-
+     * public void concat(final Path trg, final Path [] psrcs) throws IOException {
+     * throw new UnsupportedOperationException("Not implemented by the " +
+     * getClass().getSimpleName() + " FileSystem implementation"); }
+     */
+    
     @Override
     public void close() throws IOException {
         super.close();
-        client.shutdown();
+        client.close();
     }
     
     @Override
@@ -96,24 +96,18 @@ public class OrclFileSystem extends FileSystem {
         checkPath(path);
         path = makeAbsolute(path);
         
-        if (progress != null) {
-            progress.progress();
-        }
+        progress(progress);
         
         OrclInode inode = client.lstat(path);
         
-        if (progress != null) {
-            progress.progress();
-        }
+        progress(progress);
         
         boolean exists = inode != null;
         if (exists && !inode.isFile()) {
             throw new PathIsDirectoryException("Path is a directory..." + path);
         }
         
-        if (progress != null) {
-            progress.progress();
-        }
+        progress(progress);
         
         int flags = OrclInode.O_WRONLY | OrclInode.O_CREAT;
         
@@ -132,9 +126,7 @@ public class OrclFileSystem extends FileSystem {
             }
         }
         
-        if (progress != null) {
-            progress.progress();
-        }
+        progress(progress);
         
         if (blockSize > Integer.MAX_VALUE) {
             blockSize = Integer.MAX_VALUE;
@@ -147,12 +139,16 @@ public class OrclFileSystem extends FileSystem {
         
         inode = client.open(path, flags, permission.toShort());
         
-        if (progress != null) {
-            progress.progress();
-        }
+        progress(progress);
         
         OrclOutputStream ostream = new OrclOutputStream(getConf(), client, inode, bufferSize);
         return new FSDataOutputStream(ostream, statistics);
+    }
+    
+    private static void progress(Progressable progress) {
+        if (progress != null) {
+            progress.progress();
+        }
     }
     
     @Override
@@ -250,8 +246,8 @@ public class OrclFileSystem extends FileSystem {
                 inode.isDir(), //
                 getDefaultReplication(), //
                 getDefaultBlockSize(), //
-                inode.getAtime().toInstant().getEpochSecond(), //
-                inode.getAtime().toInstant().getEpochSecond(), //
+                inode.getAtime(), //
+                inode.getAtime(), //
                 new FsPermission(inode.getMode()), inode.getOwner(), //
                 inode.getGroup(), //
                 path.makeQualified(getUri(), getWorkingDirectory()));
@@ -316,8 +312,8 @@ public class OrclFileSystem extends FileSystem {
                         inode.isDir(), //
                         getDefaultReplication(), //
                         getDefaultBlockSize(), //
-                        inode.getAtime().toInstant().getEpochSecond(), //
-                        inode.getAtime().toInstant().getEpochSecond(), //
+                        inode.getAtime(), //
+                        inode.getAtime(), //
                         new FsPermission(inode.getMode()), inode.getOwner(), //
                         inode.getGroup(), //
                         xp.makeQualified(getUri(), getWorkingDirectory()));

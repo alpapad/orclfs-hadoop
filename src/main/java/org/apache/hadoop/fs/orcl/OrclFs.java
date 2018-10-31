@@ -9,7 +9,7 @@ import org.apache.hadoop.fs.DelegateToFileSystem;
 
 public class OrclFs extends DelegateToFileSystem {
     
-    OrclFs(final URI theUri, final Configuration conf) throws IOException, URISyntaxException {
-        super(theUri, new OrclFileSystem(theUri, conf), conf, "orcl", true);
+    public OrclFs(final URI theUri, final Configuration conf) throws IOException, URISyntaxException {
+        super(theUri, new OrclFileSystem(conf), conf, "orcl", true);
     }
 }
