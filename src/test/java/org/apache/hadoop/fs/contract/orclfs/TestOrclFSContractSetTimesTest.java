@@ -20,7 +20,6 @@ package org.apache.hadoop.fs.contract.orclfs;
 
 import static org.apache.hadoop.fs.contract.ContractTestUtils.touch;
 
-import java.io.FileNotFoundException;
 import java.util.Date;
 
 import org.apache.hadoop.conf.Configuration;

@@ -121,13 +121,14 @@ public class OrclInputStream extends FSInputStream {
         
         do {
             read = Math.min(len, bufValid - bufPos);
-            try {
-                System.arraycopy(buffer, bufPos, buf, off, read);
-            } catch (ArrayStoreException ae) {
-                throw new IOException("OrclInputStream failed to do an array copy due to type mismatch...");
-            } catch (NullPointerException ne) {
-                throw new IOException("OrclInputStream.read: cannot read " + len + "bytes from inode:" + inode + ": buf is null");
-            }
+            System.arraycopy(buffer, bufPos, buf, off, read);
+//            try {
+//                System.arraycopy(buffer, bufPos, buf, off, read);
+//            } catch (ArrayStoreException ae) {
+//                throw new IOException("OrclInputStream failed to do an array copy due to type mismatch...");
+//            } catch (NullPointerException ne) {
+//                throw new IOException("OrclInputStream.read: cannot read " + len + "bytes from inode:" + inode + ": buf is null");
+//            }
             bufPos += read;
             len -= read;
             off += read;

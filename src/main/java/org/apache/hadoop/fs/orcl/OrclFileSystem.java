@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.EnumSet;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CreateFlag;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -23,7 +21,7 @@ import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.util.Progressable;
 
 public class OrclFileSystem extends FileSystem {
-    private static final Log LOG = LogFactory.getLog(OrclFileSystem.class);
+    //private static final Log LOG = LogFactory.getLog(OrclFileSystem.class);
     
     private OrclFsClient client = null;
     private URI uri;
@@ -36,6 +34,7 @@ public class OrclFileSystem extends FileSystem {
         // BAD BAD BAD BAD
         this.setConf(conf);
     }
+    
     /**
      * Return the protocol scheme for this FileSystem.
      * <p>
@@ -57,15 +56,15 @@ public class OrclFileSystem extends FileSystem {
         
         progress(progress);
         
-        OrclInode fd = client.lstat(path);
+        OrclInode inode = client.lstat(path);
         
         progress(progress);
         
-        if (fd == null || !fd.isFile()) {
+        if (inode == null || !inode.isFile()) {
             throw new FileNotFoundException("Path " + path + " does not exist or it not a file");
         }
-        OrclOutputStream ostream = new OrclOutputStream(getConf(), client, fd, bufferSize, fd.getSize());
-        return new FSDataOutputStream(ostream, statistics, fd.getSize());
+        OrclOutputStream ostream = new OrclOutputStream(getConf(), client, inode, bufferSize, inode.getSize());
+        return new FSDataOutputStream(ostream, statistics, inode.getSize());
     }
     
     /*
@@ -127,15 +126,6 @@ public class OrclFileSystem extends FileSystem {
         }
         
         progress(progress);
-        
-        if (blockSize > Integer.MAX_VALUE) {
-            blockSize = Integer.MAX_VALUE;
-            LOG.info("blockSize too large. Rounding down to " + blockSize);
-        }
-        
-        if (blockSize <= 0) {
-            throw new IllegalArgumentException("Invalid block size: " + blockSize);
-        }
         
         inode = client.open(path, flags, permission.toShort());
         
@@ -201,9 +191,6 @@ public class OrclFileSystem extends FileSystem {
         }
         
         FileStatus[] dirlist = listStatus(path);
-        if (dirlist == null) {
-            return false;
-        }
         
         if (!recursive && dirlist.length > 0) {
             throw new PathIsNotEmptyDirectoryException("Directory " + path.toString() + "is not empty.");
@@ -274,9 +261,7 @@ public class OrclFileSystem extends FileSystem {
     @Override
     public void initialize(URI uri, Configuration conf) throws IOException {
         super.initialize(uri, conf);
-        if (client == null) {
-            client = new OrclClientImpl();
-        }
+        client = new OrclClientImpl();
         client.initialize(uri, conf);
         setConf(conf);
         this.uri = URI.create(uri.getScheme() + "://" + uri.getAuthority());
@@ -303,25 +288,23 @@ public class OrclFileSystem extends FileSystem {
         }
         
         OrclInode[] dirlist = client.listdir(path);
-        if (dirlist != null) {
-            FileStatus[] status = new FileStatus[dirlist.length];
-            for (int i = 0; i < status.length; i++) {
-                OrclInode inode = dirlist[i];
-                Path xp = new Path(inode.getPath());
-                status[i] = new FileStatus(inode.getSize(), //
-                        inode.isDir(), //
-                        getDefaultReplication(), //
-                        getDefaultBlockSize(), //
-                        inode.getAtime(), //
-                        inode.getAtime(), //
-                        new FsPermission(inode.getMode()), inode.getOwner(), //
-                        inode.getGroup(), //
-                        xp.makeQualified(getUri(), getWorkingDirectory()));
-            }
-            return status;
-        } else {
-            throw new PathNotFoundException("File " + path + " does not exist.");
+        
+        FileStatus[] status = new FileStatus[dirlist.length];
+        for (int i = 0; i < status.length; i++) {
+            OrclInode inode = dirlist[i];
+            Path xp = new Path(inode.getPath());
+            status[i] = new FileStatus(inode.getSize(), //
+                    inode.isDir(), //
+                    getDefaultReplication(), //
+                    getDefaultBlockSize(), //
+                    inode.getAtime(), //
+                    inode.getAtime(), //
+                    new FsPermission(inode.getMode()), inode.getOwner(), //
+                    inode.getGroup(), //
+                    xp.makeQualified(getUri(), getWorkingDirectory()));
         }
+        return status;
+        
     }
     
     private Path makeAbsolute(Path path) {
@@ -362,19 +345,12 @@ public class OrclFileSystem extends FileSystem {
         checkPath(dst);
         src = makeAbsolute(src);
         dst = makeAbsolute(dst);
-        {
-            OrclInode stat = client.lstat(src);
-            if (stat == null) {
-                throw new PathNotFoundException("Source does not exist:" + src);
-            }
-        }
         
         try {
             client.rename(src, dst);
         } catch (PathNotFoundException e) {
             throw e;
         } catch (Exception e) {
-            e.printStackTrace();
             return false;
         }
         

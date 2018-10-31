@@ -20,14 +20,7 @@ public class OrclConfigKeys extends CommonConfigurationKeys {
     
     public static final String ORCL_CONNECTION_VALIDATION_QUERY = "orclfs.connection.validation-query";
     public static final String ORCL_CONNECTION_VALIDATION_QUERY_DEFAULT = "select 1 from dual";
-    /*
-     * pds.setURL("jdbc:oracle:thin:@//localhost:1521/XE"); pds.setUser("DFS");
-     * pds.setPassword("DFS"); // Setting pool properties pds.setInitialPoolSize(5);
-     * pds.setMinPoolSize(5); pds.setMaxPoolSize(10);
-     * pds.setValidateConnectionOnBorrow(true);
-     * 
-     * pds
-     */
+
     public static final String ORCL_CONNECTION_INITIAL_POOL_SIZE = "orclfs.connection.initial-pol-size";
     public static final int ORCL_CONNECTION_INITIAL_POOL_SIZE_DEFAULT = 5;
     

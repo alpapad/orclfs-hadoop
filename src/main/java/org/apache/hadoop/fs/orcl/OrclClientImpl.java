@@ -45,8 +45,6 @@ import org.apache.hadoop.fs.permission.FsPermission;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
 
 import oracle.jdbc.OracleConnection;
 import oracle.jdbc.OraclePreparedStatement;
@@ -112,11 +110,12 @@ class OrclClientImpl extends OrclFsClient {
     }
     
     private final static LoadingCache<CacheKey, PoolDataSource> pdsCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterWrite(10, TimeUnit.MINUTES)
-            .removalListener(new RemovalListener<CacheKey, PoolDataSource>() {
-                @Override
-                public void onRemoval(RemovalNotification<CacheKey, PoolDataSource> notification) {
-                }
-            }).build(new CacheLoader<CacheKey, PoolDataSource>() {
+//            .removalListener(new RemovalListener<CacheKey, PoolDataSource>() {
+//                @Override
+//                public void onRemoval(RemovalNotification<CacheKey, PoolDataSource> notification) {
+//                }
+//            })
+            .build(new CacheLoader<CacheKey, PoolDataSource>() {
                 public PoolDataSource load(CacheKey key) throws SQLException {
                     PoolDataSource pds = PoolDataSourceFactory.getPoolDataSource();
                     // Setting connection properties of the data source
@@ -419,8 +418,6 @@ class OrclClientImpl extends OrclFsClient {
                 }
                 inode = new OrclInode(id, parentInode.getId(), name, absPath, type, mode, owner, group, 0, ts, ts);
                 return inode;
-            } catch (SQLException e) {
-                return inode;
             }
         } catch (SQLException e) {
             return inode;
@@ -544,9 +541,9 @@ class OrclClientImpl extends OrclFsClient {
     }
     
     private String pathString(Path path) {
-        if (null == path) {
-            return "/";
-        }
+//        if (null == path) {
+//            return "/";
+//        }
         String p = path.toUri().getPath();
         if (p.endsWith("/") && p.length() > 1) {
             return p.substring(0, p.length() - 1);
@@ -554,14 +551,10 @@ class OrclClientImpl extends OrclFsClient {
         return p;
     }
     
-    private OracleConnection getConnection() throws IOException {
-        try {
-            OracleConnection conn = OracleConnection.class.cast(pds.getConnection());
-            conn.setAutoCommit(false);
-            return conn;
-        } catch (SQLException e) {
-            throw new IOException("Error connecting to database...", e);
-        }
+    private OracleConnection getConnection() throws SQLException {
+        OracleConnection conn = OracleConnection.class.cast(pds.getConnection());
+        conn.setAutoCommit(false);
+        return conn;
     }
     
     private OraclePreparedStatement prep(OracleConnection con, String sql, String... columnNames) throws SQLException {
@@ -576,8 +569,6 @@ class OrclClientImpl extends OrclFsClient {
         try (OracleConnection con = getConnection()) {
             try (OraclePreparedStatement st = prep(con, sql)) {
                 return exec.execute(con, st);
-            } catch (SQLException e) {
-                throw new IOException(e);
             }
         } catch (SQLException e) {
             throw new IOException(e);
@@ -588,8 +579,6 @@ class OrclClientImpl extends OrclFsClient {
         try (OracleConnection con = getConnection()) {
             try (OraclePreparedStatement st = OraclePreparedStatement.class.cast(con.prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE))) {
                 return exec.execute(con, st);
-            } catch (SQLException e) {
-                throw new IOException(e);
             }
         } catch (SQLException e) {
             throw new IOException(e);

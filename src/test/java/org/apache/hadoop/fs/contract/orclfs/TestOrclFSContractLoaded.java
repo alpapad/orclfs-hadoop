@@ -21,6 +21,7 @@ package org.apache.hadoop.fs.contract.orclfs;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.contract.AbstractFSContract;
 import org.apache.hadoop.fs.contract.AbstractFSContractTestBase;
+import org.junit.Test;
 
 /**
  * just here to make sure that the local.xml resource is actually loading
@@ -32,4 +33,8 @@ public class TestOrclFSContractLoaded extends AbstractFSContractTestBase {
     return new OrclFSContract(conf);
   }
 
+  @Test
+  public void t() {
+      
+  }
 }
