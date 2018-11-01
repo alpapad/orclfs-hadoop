@@ -37,7 +37,6 @@ import org.apache.hadoop.fs.FsStatus;
 import org.apache.hadoop.fs.ParentNotDirectoryException;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathExistsException;
-import org.apache.hadoop.fs.PathIsDirectoryException;
 import org.apache.hadoop.fs.PathIsNotDirectoryException;
 import org.apache.hadoop.fs.PathNotFoundException;
 import org.apache.hadoop.fs.permission.FsPermission;
@@ -110,11 +109,6 @@ class OrclClientImpl extends OrclFsClient {
     }
     
     private final static LoadingCache<CacheKey, PoolDataSource> pdsCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterWrite(10, TimeUnit.MINUTES)
-//            .removalListener(new RemovalListener<CacheKey, PoolDataSource>() {
-//                @Override
-//                public void onRemoval(RemovalNotification<CacheKey, PoolDataSource> notification) {
-//                }
-//            })
             .build(new CacheLoader<CacheKey, PoolDataSource>() {
                 public PoolDataSource load(CacheKey key) throws SQLException {
                     PoolDataSource pds = PoolDataSourceFactory.getPoolDataSource();
@@ -220,7 +214,7 @@ class OrclClientImpl extends OrclFsClient {
     OrclInode open(Path path, int flags, short mode) throws IOException {
         OrclInode stat = __open(path, flags, mode);
         if (stat.isDir()) {
-            throw new PathIsDirectoryException(path.toString());
+            throw new FileNotFoundException(path.toString());
         }
         return stat;
     }
@@ -352,6 +346,9 @@ class OrclClientImpl extends OrclFsClient {
         deleteInode(inode);
     }
     
+ // See: https://vsadilovskiy.wordpress.com/2007/11/19/blob-write-size-and-cpu/
+    private final static int writeSize = 32 * 1024 - 240;
+    
     @Override
     int write(OrclInode inode, final byte[] buffer, final int size) throws IOException {
         return this.selectForUpdate("SELECT BLOCK_DATA FROM FS_BLOCK WHERE ID = ? FOR UPDATE", (con, st) -> {
@@ -361,7 +358,18 @@ class OrclClientImpl extends OrclFsClient {
                     Blob b = rs.getBlob(1);
                     
                     try (final BufferedOutputStream out = new BufferedOutputStream(b.setBinaryStream(b.length() + 1))) {
-                        out.write(buffer, 0, size);
+                        if (size < writeSize) {
+                            out.write(buffer, 0, size);
+                        } else {
+                            int ofs = 0;
+                            
+                            while (ofs < size) {
+                                int l = Math.min(writeSize, size - ofs);
+                                out.write(buffer, ofs, l);
+                                out.flush();
+                                ofs += l;
+                            }
+                        }
                     }
                     con.commit();
                     return size;
@@ -541,9 +549,6 @@ class OrclClientImpl extends OrclFsClient {
     }
     
     private String pathString(Path path) {
-//        if (null == path) {
-//            return "/";
-//        }
         String p = path.toUri().getPath();
         if (p.endsWith("/") && p.length() > 1) {
             return p.substring(0, p.length() - 1);

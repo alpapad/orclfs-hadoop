@@ -97,7 +97,7 @@
 
 	<property>
 		<name>fs.contract.supports-strict-exceptions</name>
-		<value>false</value>
+		<value>true</value>
 	</property>
 
 	<property>

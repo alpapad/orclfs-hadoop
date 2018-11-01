@@ -14,14 +14,12 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FsStatus;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.PathIsDirectoryException;
 import org.apache.hadoop.fs.PathIsNotEmptyDirectoryException;
 import org.apache.hadoop.fs.PathNotFoundException;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.util.Progressable;
 
 public class OrclFileSystem extends FileSystem {
-    //private static final Log LOG = LogFactory.getLog(OrclFileSystem.class);
     
     private OrclFsClient client = null;
     private URI uri;
@@ -35,15 +33,6 @@ public class OrclFileSystem extends FileSystem {
         this.setConf(conf);
     }
     
-    /**
-     * Return the protocol scheme for this FileSystem.
-     * <p>
-     * This implementation throws an <code>UnsupportedOperationException</code>.
-     *
-     * @return the protocol scheme for this FileSystem.
-     * @throws UnsupportedOperationException if the operation is unsupported
-     *                                       (default).
-     */
     @Override
     public String getScheme() {
         return "orcl";
@@ -63,7 +52,7 @@ public class OrclFileSystem extends FileSystem {
         if (inode == null || !inode.isFile()) {
             throw new FileNotFoundException("Path " + path + " does not exist or it not a file");
         }
-        OrclOutputStream ostream = new OrclOutputStream(getConf(), client, inode, bufferSize, inode.getSize());
+        OrclOutputStream ostream = new OrclOutputStream(getConf(), client, inode, bufferSize);
         return new FSDataOutputStream(ostream, statistics, inode.getSize());
     }
     
@@ -103,7 +92,7 @@ public class OrclFileSystem extends FileSystem {
         
         boolean exists = inode != null;
         if (exists && !inode.isFile()) {
-            throw new PathIsDirectoryException("Path is a directory..." + path);
+            throw new FileAlreadyExistsException("Path is a directory..." + path);
         }
         
         progress(progress);
@@ -156,7 +145,7 @@ public class OrclFileSystem extends FileSystem {
                         throw new FileAlreadyExistsException(path.toString());
                     }
                 } else {
-                    throw new PathIsDirectoryException(path.toString());
+                    throw new FileAlreadyExistsException(path.toString());
                 }
             }
         }
@@ -244,6 +233,9 @@ public class OrclFileSystem extends FileSystem {
     
     @Override
     public FsStatus getStatus(Path p) throws IOException {
+        if(p == null) {
+            p = new Path("/");
+        }
         checkPath(p);
         return client.statfs(p);
     }
@@ -332,7 +324,6 @@ public class OrclFileSystem extends FileSystem {
         checkPath(path);
         path = makeAbsolute(path);
         
-        // throws filenotfoundexception if path is a directory
         OrclInode fd = client.open(path, OrclInode.O_CREAT, FsPermission.getFileDefault().applyUMask(FsPermission.getUMask(getConf())).toShort());
         
         OrclInputStream istream = new OrclInputStream(getConf(), client, fd, fd.getSize(), bufferSize);
@@ -349,7 +340,7 @@ public class OrclFileSystem extends FileSystem {
         try {
             client.rename(src, dst);
         } catch (PathNotFoundException e) {
-            throw e;
+            throw new FileNotFoundException(e.getMessage());
         } catch (Exception e) {
             return false;
         }

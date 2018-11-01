@@ -15,10 +15,15 @@ import org.apache.hadoop.fs.test.connector.HcfsTestConnectorFactory;
 import org.apache.hadoop.fs.test.connector.HcfsTestConnectorInterface;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.opencsv.CSVReader;
 
 public class ReadCsvTest {
+    private static final Logger LOG =
+            LoggerFactory.getLogger(ReadCsvTest.class);
+    
     static FileSystem fs;
     
     @BeforeClass
@@ -44,12 +49,12 @@ public class ReadCsvTest {
                     assertEquals("5 cols", 5, nextRecord.length);
                     assertEquals("Col 1 is C1", "C1", nextRecord[0]);
                     assertEquals("Col 5 is C5", "C5", nextRecord[4]);
-                    System.out.println("C1 : " + nextRecord[0]);
-                    System.out.println("C2 : " + nextRecord[1]);
-                    System.out.println("C3 : " + nextRecord[2]);
-                    System.out.println("C4 : " + nextRecord[3]);
-                    System.out.println("C5 : " + nextRecord[4]);
-                    System.out.println("==========================");
+                    LOG.info("C1 : " + nextRecord[0]);
+                    LOG.info("C2 : " + nextRecord[1]);
+                    LOG.info("C3 : " + nextRecord[2]);
+                    LOG.info("C4 : " + nextRecord[3]);
+                    LOG.info("C5 : " + nextRecord[4]);
+                    LOG.info("==========================");
                     cnt++;
                 }
             }

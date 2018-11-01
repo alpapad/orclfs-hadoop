@@ -51,6 +51,11 @@ CREATE TABLE FS_BLOCK (
   ID NUMBER(19,0) NOT NULL ENABLE, 
   BLOCK_DATA BLOB NOT NULL ENABLE, 
   CONSTRAINT FS_BLOCK_PK PRIMARY KEY (ID)
+) LOB (BLOCK_DATA) STORE AS FS_LOB_SG 
+( 
+  DISABLE STORAGE IN ROW 
+  CHUNK 8192  
+  NOCACHE
 );
 
 ALTER TABLE FS_BLOCK ADD CONSTRAINT FK_FS_BLOCK_INODE FOREIGN KEY (ID) REFERENCES FS_INODE (ID) ENABLE;
@@ -93,98 +98,3 @@ CREATE OR REPLACE VIEW VFS_INODE AS
                PRIOR FS.ID = FS.PARENT
     ) VF
     LEFT JOIN FS_BLOCK BF ON VF.ID = BF.ID;
-
-/*
-CREATE OR REPLACE VIEW VFS_INODE AS
-SELECT b.ID, b.PARENT, NULL AS NAME, '/' AS PATH, b.ITYPE, b.IMODE, b.IOWNER, b.IGROUP, b.ISIZE, b.A_TIME, B.M_TIME from fs_inode b where b.id  =0
-UNION ALL
-SELECT
-    a.id,
-    a.parent,
-    a.name,
-    sys_connect_by_path(a.name, '/') path,
-    a.itype,
-    a.imode,
-    a.iowner,
-    a.igroup,
-    a.isize,
-    a.A_TIME,
-    A.M_TIME
-FROM
-    fs_inode a
-START WITH
-    parent = 0
-CONNECT BY
-    PRIOR a.id = a.parent;
-
-INSERT INTO fs_inode (id, parent, name, itype) VALUES (0, null, 'root of fs',1);
-
-COMMIT;
-
-CREATE OR REPLACE VIEW VFS_INODEA AS
-SELECT b.ID, b.PARENT, NULL AS NAME, '/' AS PATH, b.ITYPE, b.IMODE, b.IOWNER, b.IGROUP,  b.A_TIME, B.M_TIME from fs_inode b where b.id  =0
-UNION ALL
-SELECT
-    a.id,
-    a.parent,
-    a.name,
-    sys_connect_by_path(a.name, '/') path,
-    a.itype,
-    a.imode,
-    a.iowner,
-    a.igroup,
-    a.A_TIME,
-    A.M_TIME
-FROM
-    fs_inode a
-START WITH
-    parent = 0
-CONNECT BY
-    PRIOR a.id = a.parent;
-
-CREATE OR REPLACE VIEW VFS_INODE AS
-SELECT A.*, NVL2(B.BLOCK_DATA,dbms_lob.getlength(B.BLOCK_DATA),0) AS ISIZE
-FROM VFS_INODEA A
-LEFT JOIN FS_BLOCK B ON A.ID = B.ID;
-
-
-ALTER TABLE FS_INODE ADD CONSTRAINT FS_INODE_N_P_UIDX UNIQUE (NAME, PARENT) ENABLE;
-
-*/
-ALTER TABLE FS_BLOCK MOVE 
-LOB (BLOCK_DATA) STORE AS FS_LOB_SG 
-( 
-  DISABLE STORAGE IN ROW 
-  CHUNK 8192 
-  NOCACHE
-  );
-
-ALTER TABLE FS_BLOCK MOVE 
-LOB (BLOCK_DATA) STORE AS FS_BLOB_STORE 
-( 
-  DISABLE STORAGE IN ROW 
-  CHUNK 8192 
-  NOCACHE 
-  LOGGING 
-  TABLESPACE USERS 
-  STORAGE 
-  ( 
-    INITIAL 106496 
-    NEXT 1048576 
-    MINEXTENTS 1 
-    MAXEXTENTS UNLIMITED 
-    BUFFER_POOL DEFAULT 
-  )  
-);
-
-CREATE TABLE TABLE1 
-(
-  COLUMN1 BLOB 
-) 
-LOB (COLUMN1) STORE AS FS_LOB_SG 
-( 
-  DISABLE STORAGE IN ROW 
-  CHUNK 32768  
-);
-
-

@@ -20,9 +20,12 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HcfsFileSystemTest {
-    
+    private static final Logger LOG =
+            LoggerFactory.getLogger(HcfsFileSystemTest.class);
     static FileSystem fs;
     
     /**
@@ -231,16 +234,16 @@ public class HcfsFileSystemTest {
         // fs.setWorkingDirectory(baseDir);
         
         fs.mkdirs(subDir1);
-        
-        FSDataOutputStream s1 = fs.create(file1, true, 4096, (short) 1, (long) 4096, null);
-        
-        int bufsz = 104_857;//_600;
+
+        FSDataOutputStream s1 =fs.create(file1, true);
+
+        int bufsz = 104_857_600;
         byte[] data = new byte[bufsz];
         Random r = new Random();
         for (int i = 0; i < data.length; i++) {
             data[i] = (byte) r.nextInt(256) ;
         }
-        System.err.println("Starting writting...");
+        LOG.info("Starting writting...");
         long t1 = System.currentTimeMillis();
         
         // write 4 bytes and read them back; read API should return a byte per
@@ -254,11 +257,11 @@ public class HcfsFileSystemTest {
         // flush out the changes
         s1.close();
         long t2 = System.currentTimeMillis();
-        System.err.println("Done writting in "  + (t2-t1)/1000f + " sec");
+        LOG.info("Done writting in "  + (t2-t1)/1000f + " sec");
         // Read the stuff back and verify it is correct
         FSDataInputStream s2 = fs.open(file1, 4096);
         int v;
-        System.err.println("Starting reading...");
+        LOG.info("Starting reading...");
         t1 = System.currentTimeMillis();
         
         v = s2.read();
@@ -279,7 +282,7 @@ public class HcfsFileSystemTest {
         t2 = System.currentTimeMillis();
         s2.close();
         
-        System.err.println("Done reading in "  + (t2-t1)/1000f + " sec");
+        LOG.info("Done reading in "  + (t2-t1)/1000f + " sec");
         for (int i = 0; i < data.length; i++) {
             assertEquals(data[i], buf[i]);
         }

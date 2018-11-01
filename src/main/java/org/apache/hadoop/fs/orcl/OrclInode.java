@@ -6,17 +6,17 @@ package org.apache.hadoop.fs.orcl;
 public class OrclInode {
     public static final int DIRECTORY_TYPE = 1;
     public static final int FILE_TYPE = 0;
-
+    
     public static final int O_APPEND = 4;
     public static final int O_CREAT = 8;
     
     public static final int O_EXCL = 32;
-
+    
     public static final int O_RDONLY = 1;
     public static final int O_RDWR = 2;
     public static final int O_TRUNC = 16;
     public static final int O_WRONLY = 64;
-
+    
     private final long atime;
     private final String group;
     private final long id;
@@ -96,11 +96,13 @@ public class OrclInode {
     public boolean isFile() {
         return getType() != DIRECTORY_TYPE;
     }
-
+    
     @Override
     public String toString() {
-        return "OrclInode [id=" + id + ", parent=" + getParent() + ", name=" + getName() + ", path=" + path + ", type=" + type + ", mode=" + mode + ", owner=" + owner + ", group=" + group + ", size=" + size
-                + ", atime=" + getAtime() + ", mtime=" + getMtime() + "]";
+        return "OrclInode [id=" + getId() + ", parent=" + getParent() //
+                + ", name=" + getName() + ", path=" + getPath() + ", type=" + getType() //
+                + ", mode=" + getMode() + ", owner=" + getOwner() + ", group=" + getGroup() //
+                + ", size=" + getSize() + ", atime=" + getAtime() + ", mtime=" + getMtime() + "]";
     }
-
+    
 }
