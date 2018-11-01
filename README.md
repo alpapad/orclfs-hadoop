@@ -1,9 +1,11 @@
-Oracle FS (aka orcl) Hadoop Plugin!
+Oracle FS (aka OrclFS) Hadoop Plugin!
 =====================
 
 ## Why ? ## 
 
-There are cases where installing an HDFS cluster (or even NFS) is beyond the scope, needs capacity or reach of a project. Still you need a DFS to run those (small?) spark jobs you might have.
+There are cases where installing an HDFS cluster (or even NFS) is beyond the scope, needs, capacity or power of a project. Still you need a DFS to run those (small?) spark jobs you might have and you already have Oracle. 
+
+OrclFS implements a Hadoop Filesystem on top of an Oracle DB.
 
 Is this that crazy? Apparently not, Oracle has this thing called  the "Oracle Database File System" :-) 
 
